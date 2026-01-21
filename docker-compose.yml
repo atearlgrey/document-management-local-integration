@@ -1,48 +1,5 @@
 version: '3.8'
 services:
-  postgres:
-    image: postgres:14
-    container_name: keycloak_postgres
-    restart: always
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      TZ: Asia/BangKok           # ✅ Đặt timezone hệ thống container
-      PGTZ: Asia/BangKok         # ✅ Đặt timezone cho PostgreSQL
-    ports:
-      - "5432:5432"
-    volumes:
-      # Moved DB initialization to Flyway migrations. Keep persistent data volume only.
-      - ./postgres/init:/docker-entrypoint-initdb.d
-      - postgres_data:/var/lib/postgresql/data
-    networks:
-      - document-management-net
-
-  keycloak:
-    image: atearlgrey/plant-growth-identity:latest   # phiên bản ổn định
-    container_name: keycloak_server
-    restart: always
-    environment:
-      - KEYCLOAK_ADMIN=admin
-      - KEYCLOAK_ADMIN_PASSWORD=admin
-      - KC_DB=postgres
-      - KC_DB_URL_HOST=postgres
-      - KC_DB_URL_DATABASE=keycloak
-      - KC_DB_USERNAME=keycloak
-      - KC_DB_PASSWORD=keycloak
-      - KC_HOSTNAME=localhost
-    command:
-      - start-dev
-      - --import-realm
-    ports:
-      - "8080:8080"
-    depends_on:
-      - postgres
-    volumes:
-      - ./keycloak-init/realm/:/opt/keycloak/data/import/
-    networks:
-      - document-management-net
-  
   keycloak-importer:
     image: alpine:3.20
     container_name: keycloak_importer
@@ -51,8 +8,6 @@ services:
       - KEYCLOAK_ADMIN_PASSWORD=admin
       - REALM=plant-growth
       - KEYCLOAK_URL=http://keycloak:8080
-    depends_on:
-      - keycloak
     volumes:
       - ./keycloak-init/:/opt/keycloak/data/import/
     entrypoint: >
@@ -79,32 +34,10 @@ services:
       "
     volumes:
       - ./flyway-migration-files/keycloak:/flyway/keycloak:ro
-    depends_on:
-      - postgres
-      - keycloak
     networks:
       - document-management-net
-
-  document-app:
-    image: atearlgrey/document-management-app-demo
-    container_name: document-app
-    restart: always
-    environment:
-      - PRODUCTION="true"
-      - ENVIRONMENT="production"
-      - ENABLE_AUTH="true"
-      - AUTHORITY_URL=http://localhost:8080
-      - AUTHORITY_REALM=plant-growth
-      - AUTHORITY_CLIENT_ID=plant-growth-client
-      - SERVICE_URL=http://localhost:4301
-    depends_on:
-      - keycloak
-    networks:
-      - document-management-net
-  
-volumes:
-  postgres_data:
 
 networks:
   document-management-net:
-    driver: bridge
+    external: true
+    name: document-management-net
