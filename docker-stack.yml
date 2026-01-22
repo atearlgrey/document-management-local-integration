@@ -32,7 +32,9 @@ services:
       - KC_DB_URL_DATABASE=keycloak
       - KC_DB_USERNAME=keycloak
       - KC_DB_PASSWORD=keycloak
-      - KC_HOSTNAME=localhost
+      - KC_HOSTNAME=192.168.103.136
+      - KC_HOSTNAME_STRICT=false
+      - KC_PROXY=edge
     command:
       - start-dev
       - --import-realm
@@ -56,10 +58,13 @@ services:
       - PRODUCTION="true"
       - ENVIRONMENT="production"
       - ENABLE_AUTH="true"
-      - AUTHORITY_URL=http://localhost:8080
+      - AUTHORITY_URL=http://192.168.103.136:8080
       - AUTHORITY_REALM=plant-growth
       - AUTHORITY_CLIENT_ID=plant-growth-client
-      - SERVICE_URL=http://localhost:4301
+      - SERVICE_URL=http://192.168.103.136:4301
+    ports:
+      - "80:80"
+      - "443:443"
     networks:
       - document-management-net
     deploy:
