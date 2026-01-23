@@ -55,9 +55,9 @@ services:
   document-app:
     image: atearlgrey/document-management-app-demo
     environment:
-      - PRODUCTION="true"
-      - ENVIRONMENT="production"
-      - ENABLE_AUTH="true"
+      - PRODUCTION=true
+      - ENVIRONMENT=production
+      - ENABLE_AUTH=true
       - AUTHORITY_URL=http://192.168.103.136:8080
       - AUTHORITY_REALM=plant-growth
       - AUTHORITY_CLIENT_ID=plant-growth-client
